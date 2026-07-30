@@ -1,16 +1,17 @@
 import { logger } from "../../lib/logger.js";
 import { solveRecaptchaV2 } from "./captcha.js";
-import { callEstimar, parseApiResponse } from "./client.js";
+import { callEstimar, createSession, parseApiResponse } from "./client.js";
 import type { DnrpaVehicle } from "./types.js";
 
 const RETRY_DELAY_MS = () => 5000 + Math.random() * 3000;
 
 /**
  * Busca vehículo por patente en DNRPA.
- * 1) Resuelve captcha
- * 2) Intenta CodigoTramite NACIONAL (083000)
- * 3) Si falla, IMPORTADO (084000) con el mismo token
- * 4) Un reintento completo con token nuevo si todo falla
+ * 1) CSRF token
+ * 2) Resuelve captcha
+ * 3) Intenta CodigoTramite NACIONAL (083000)
+ * 4) Si falla, IMPORTADO (084000) con el mismo token/sesión
+ * 5) Un reintento completo con token nuevo si todo falla
  */
 export async function searchByPatente(
   patente: string,
@@ -26,14 +27,15 @@ export async function searchByPatente(
     }
 
     try {
+      const session = await createSession();
       const token = await solveRecaptchaV2();
 
-      let data = await callEstimar(patente, token, "083000");
+      let data = await callEstimar(patente, token, "083000", session);
       let vehicle = parseApiResponse(data);
 
       if (!vehicle) {
         logger.debug("Sin datos con 083000, probando 084000");
-        data = await callEstimar(patente, token, "084000");
+        data = await callEstimar(patente, token, "084000", session);
         vehicle = parseApiResponse(data);
       }
 
@@ -52,7 +54,8 @@ export async function searchByPatente(
           type: null,
           year: null,
           origin: null,
-          error: "No se pudo obtener información del vehículo después de múltiples intentos",
+          error:
+            "No se pudo obtener información del vehículo después de múltiples intentos",
         };
       }
     } catch (err) {
