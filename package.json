@@ -1,7 +1,7 @@
 {
   "name": "renova-data-providers",
   "version": "1.0.0",
-  "description": "Servicio de proveedores de datos externos (DNRPA, etc.)",
+  "description": "Servicio de proveedores de datos externos (DNRPA, Lubaires, etc.)",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
