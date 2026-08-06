@@ -38,11 +38,19 @@ Respuesta OK:
 
 ### Lubaires
 
-Busca artículos por código o texto (API autenticada con JWT).
+Busca artículos por código (API autenticada con JWT), filtrando por marca y match exacto de código.
+Lubaires puede devolver resultados fuzzy de varias marcas; cada endpoint solo deja ítems de esa marca cuyo código coincide (ignorando espacios/símbolos).
 Aplica el descuento configurado en `src/providers/config.ts` (hoy 30%) sobre el precio del proveedor.
 
 ```http
-POST /api/lubaires/search
+POST /api/lubaires/mann/search
+Content-Type: application/json
+
+{ "code": "W7122" }
+```
+
+```http
+POST /api/lubaires/wix/search
 Content-Type: application/json
 
 { "code": "WL10489A" }
@@ -71,7 +79,8 @@ Respuesta OK:
 }
 ```
 
-Config de scrapers (URL, descuento, etc.): `src/providers/config.ts`
+Config de scrapers (URL, descuento, credenciales): `src/providers/config.ts`.
+El token se obtiene con login automático a `/users/login` y se renueva si la sesión expira.
 
 ## Setup local
 
@@ -93,4 +102,4 @@ Healthcheck: `GET http://localhost:3100/health`
 | `RECAPTCHA_SOLVER_API_KEY` | API key de 2captcha |
 | `LOG_LEVEL` | Nivel de log pino (default `info`) |
 
-URL, token y descuento de Lubaires viven en `src/providers/config.ts`.
+URL, credenciales y descuento de Lubaires viven en `src/providers/config.ts`.

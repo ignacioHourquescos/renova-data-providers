@@ -1,5 +1,6 @@
 import { logger } from "../../lib/logger.js";
 import { applyDiscount, providers } from "../config.js";
+import { clearAccessToken, getAccessToken } from "./auth.js";
 import type { LubairesApiArticle, LubairesArticle } from "./types.js";
 
 const config = providers.lubaires;
@@ -14,17 +15,13 @@ const BASE_HEADERS: Record<string, string> = {
 
 /**
  * GET /v1/articles — búsqueda por código/texto.
- * Auth: header x-access-token (JWT en providers/config.ts).
+ * Auth: login automático + header x-access-token (reintenta si la sesión expiró).
  */
 export async function searchArticles(
   query: string,
   page = 1,
   perPage = 30,
 ): Promise<LubairesApiArticle[]> {
-  if (!config.accessToken) {
-    throw new Error("Lubaires accessToken no configurado en providers/config.ts");
-  }
-
   const filters = JSON.stringify({ search: query });
   const params = new URLSearchParams({
     _page: String(page),
@@ -38,14 +35,15 @@ export async function searchArticles(
   const url = `${config.baseUrl}/articles?${params.toString()}`;
   logger.debug({ query, page, perPage }, "Calling Lubaires articles API");
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      ...BASE_HEADERS,
-      [config.authHeader]: config.accessToken,
-    },
-    signal: AbortSignal.timeout(30_000),
-  });
+  let token = await getAccessToken();
+  let response = await fetchArticles(url, token);
+
+  if (response.status === 401) {
+    logger.warn("Lubaires session expired, re-login");
+    clearAccessToken();
+    token = await getAccessToken(true);
+    response = await fetchArticles(url, token);
+  }
 
   if (!response.ok) {
     const body = await response.text().catch(() => "");
@@ -60,6 +58,17 @@ export async function searchArticles(
   }
 
   return data as LubairesApiArticle[];
+}
+
+function fetchArticles(url: string, token: string): Promise<Response> {
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      ...BASE_HEADERS,
+      [config.authHeader]: token,
+    },
+    signal: AbortSignal.timeout(30_000),
+  });
 }
 
 export function parseArticle(raw: LubairesApiArticle): LubairesArticle {

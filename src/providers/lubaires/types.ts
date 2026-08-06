@@ -1,3 +1,5 @@
+export type LubairesBrand = "MANN" | "WIX";
+
 export type LubairesArticle = {
   code: string | null;
   name: string | null;
