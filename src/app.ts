@@ -2,6 +2,8 @@ import cors from "cors";
 import express from "express";
 import { dnrpaRouter } from "./routes/dnrpa.js";
 import { lubairesRouter } from "./routes/lubaires.js";
+import { wegaRouter } from "./routes/wega.js";
+import { framRouter } from "./routes/fram.js";
 
 export function createApp() {
   const app = express();
@@ -15,6 +17,8 @@ export function createApp() {
 
   app.use("/api/dnrpa", dnrpaRouter);
   app.use("/api/lubaires", lubairesRouter);
+  app.use("/api/wega", wegaRouter);
+  app.use("/api/fram", framRouter);
 
   return app;
 }

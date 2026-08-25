@@ -82,6 +82,150 @@ Respuesta OK:
 Config de scrapers (URL, descuento, credenciales): `src/providers/config.ts`.
 El token se obtiene con login automático a `/users/login` y se renueva si la sesión expira.
 
+### Wega
+
+Catálogo de filtros por marca y modelo de vehículo. Scraper de `https://www.wega.com.ar/catalogo`.
+Los valores `make` / `model` / `id` son **IDs numéricos internos de Wega** (ej: PEUGEOT = `"177"`), no nombres.
+Cada modelo incluye `tipoVehiculo` (`1` auto, `2` utilitario/camioneta, `3` pesado). El catálogo prueba esos tipos si no viene `tipoVehiculo` en el body (necesario para Hilux y similares).
+
+```http
+GET /api/wega/makes
+```
+
+```http
+POST /api/wega/models
+Content-Type: application/json
+
+{ "id": "177" }
+```
+
+```http
+POST /api/wega/catalogue
+Content-Type: application/json
+
+{ "make": "177", "model": "1234" }
+```
+
+Respuesta OK de catálogo:
+
+```json
+{
+  "headers": ["Motor", "Modelo", "Año", "Aire", "Aceite", "Combustible", "Habitaculo"],
+  "rows": [
+    {
+      "Motor": "HDI - 1,6 HDI 110 112cv",
+      "Año": "2009 ->",
+      "Aire": "FAP-4892",
+      "Aceite": "WO-110"
+    }
+  ],
+  "error": null
+}
+```
+
+El listado de marcas es un snapshot estático (`src/providers/wega/makes.ts`). URL en `src/providers/config.ts`.
+
+Ficha de producto (equivalencia FRAM + imagen). No se enriquece el catálogo en caliente: hay que resolver códigos aparte, con cache LRU (6 h).
+
+```http
+POST /api/wega/resolve
+Content-Type: application/json
+
+{ "codes": ["FAP-2219", "WO-110"] }
+```
+
+```json
+{
+  "items": {
+    "FAP-2219": {
+      "wegaCode": "FAP-2219",
+      "framCode": "CA 12104",
+      "imageUrl": "https://www.wega.com.ar/images/productos/....webp",
+      "equivalencias": [
+        { "brand": "WEGA", "code": "FAP-2219" },
+        { "brand": "FRAM", "code": "CA 12104" }
+      ]
+    }
+  },
+  "error": null
+}
+```
+
+Si un código no tiene FRAM o la ficha no existe, `framCode` e `imageUrl` vienen `null`. Máximo 60 códigos por request, 4 scrapes en paralelo.
+
+### FRAM
+
+Catálogo de filtros por marca, modelo y versión. Scraper de `https://catalogofram.com.ar`.
+A diferencia de Wega, FRAM usa **nombres** como IDs (`PEUGEOT`, `308`, `1.6 HDI`) y pide un paso extra de versión.
+
+```http
+GET /api/fram/makes
+```
+
+```http
+POST /api/fram/models
+Content-Type: application/json
+
+{ "id": "PEUGEOT" }
+```
+
+```http
+POST /api/fram/versions
+Content-Type: application/json
+
+{ "make": "PEUGEOT", "model": "308" }
+```
+
+```http
+POST /api/fram/catalogue
+Content-Type: application/json
+
+{ "make": "PEUGEOT", "model": "308", "version": "1.6 HDI" }
+```
+
+Respuesta OK de catálogo:
+
+```json
+{
+  "headers": ["Aplicacion", "Año", "Aire", "Aceite", "Combustible", "Habitaculo", "Otros"],
+  "rows": [
+    {
+      "Aplicacion": "PEUGEOT 308 1.6 HDI DIESEL 2011 a 2015",
+      "Año": "2011 -> 2015",
+      "Aire": "CA11072",
+      "Aceite": "CH9657",
+      "Combustible": "P11047",
+      "Habitaculo": "CF9398",
+      "Otros": ""
+    }
+  ],
+  "error": null
+}
+```
+
+Ficha de producto (imagen + equivalencia WEGA). Se llama aparte, con cache LRU (6 h):
+
+```http
+POST /api/fram/resolve
+Content-Type: application/json
+
+{ "codes": ["CA 12104"] }
+```
+
+```json
+{
+  "items": {
+    "CA 12104": {
+      "framCode": "CA12104",
+      "wegaCode": "FAP2219",
+      "imageUrl": "https://production-specparts-search-api-images-bucket.s3.amazonaws.com/...",
+      "equivalencias": [{ "brand": "WEGA", "code": "FAP2219" }]
+    }
+  },
+  "error": null
+}
+```
+
 ## Setup local
 
 ```bash

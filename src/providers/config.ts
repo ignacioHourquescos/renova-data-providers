@@ -27,7 +27,23 @@ export const providers = {
     username: "1183",
     password: "001183",
   },
-} as const satisfies Record<string, ProviderConfig>;
+  wega: {
+    id: "wega",
+    name: "Wega",
+    baseUrl: "https://www.wega.com.ar",
+    origin: "https://www.wega.com.ar",
+    referer: "https://www.wega.com.ar/catalogo",
+  },
+  fram: {
+    id: "fram",
+    name: "FRAM",
+    baseUrl: "https://catalogofram.com.ar",
+    origin: "https://catalogofram.com.ar",
+    referer: "https://catalogofram.com.ar/",
+  },
+} as const;
+
+export type WegaProviderConfig = (typeof providers)["wega"];
 
 export type ProviderId = keyof typeof providers;
 
