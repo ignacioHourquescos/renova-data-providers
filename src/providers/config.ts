@@ -41,6 +41,14 @@ export const providers = {
     origin: "https://catalogofram.com.ar",
     referer: "https://catalogofram.com.ar/",
   },
+  mann: {
+    id: "mann",
+    name: "MANN-FILTER",
+    baseUrl: "https://www.mann-filter.com",
+    origin: "https://www.mann-filter.com",
+    referer: "https://www.mann-filter.com/ar-es/catalogo.html",
+    graphqlUrl: "https://www.mann-filter.com/api/graphql/catalog-prod",
+  },
 } as const;
 
 export type WegaProviderConfig = (typeof providers)["wega"];

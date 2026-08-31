@@ -20,6 +20,7 @@ export function emptyResolvedProduct(code: string): WegaResolvedProduct {
   return {
     wegaCode: String(code ?? "").trim() || code,
     framCode: null,
+    framCodes: [],
     imageUrl: null,
     equivalencias: [],
   };
@@ -38,13 +39,14 @@ export function parseProductDetail(
   if (!wegaCode) return null;
 
   const equivalencias = extractEquivalencias($);
-  const fram = equivalencias.find(
-    (item) => item.brand.replace(/\s+/g, "").toUpperCase() === "FRAM",
-  );
+  const framCodes = equivalencias
+    .filter((item) => item.brand.replace(/\s+/g, "").toUpperCase() === "FRAM")
+    .map((item) => item.code);
 
   return {
     wegaCode,
-    framCode: fram?.code || null,
+    framCode: framCodes[0] || null,
+    framCodes,
     imageUrl: extractImageUrl($, baseUrl),
     equivalencias,
   };

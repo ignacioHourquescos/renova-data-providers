@@ -34,6 +34,7 @@ export type WegaEquivalencia = {
 export type WegaResolvedProduct = {
   wegaCode: string;
   framCode: string | null;
+  framCodes: string[];
   imageUrl: string | null;
   equivalencias: WegaEquivalencia[];
 };

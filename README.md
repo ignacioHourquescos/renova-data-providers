@@ -153,6 +153,110 @@ Content-Type: application/json
 
 Si un código no tiene FRAM o la ficha no existe, `framCode` e `imageUrl` vienen `null`. Máximo 60 códigos por request, 4 scrapes en paralelo.
 
+### MANN-FILTER
+
+Catálogo de filtros por marca → modelo → versión (motor), vía GraphQL de `https://www.mann-filter.com` (`/api/graphql/catalog-prod`).
+No hay listado estático de marcas: se buscan por autocomplete. Los IDs son los internos de MANN (ej. RENAULT autos = `"00000000000091"`).
+
+Precios por código siguen en Lubaires: `POST /api/lubaires/mann/search`.
+
+```http
+POST /api/mann/makes
+Content-Type: application/json
+
+{ "search": "RENAULT" }
+```
+
+```json
+{
+  "makes": [
+    {
+      "id": "00000000000091",
+      "name": "RENAULT",
+      "zone": "Cars + Transporters",
+      "segmentId": "01",
+      "categoryId": ""
+    }
+  ],
+  "error": null
+}
+```
+
+```http
+POST /api/mann/models
+Content-Type: application/json
+
+{ "id": "00000000000091", "q": "Logan" }
+```
+
+`categoryId` es opcional (viene en el make). `q` filtra por nombre de modelo.
+
+```http
+POST /api/mann/versions
+Content-Type: application/json
+
+{ "model": "00000000018267" }
+```
+
+```http
+POST /api/mann/catalogue
+Content-Type: application/json
+
+{ "version": "00000003956642" }
+```
+
+Respuesta OK de catálogo:
+
+```json
+{
+  "items": [
+    {
+      "code": "C27030",
+      "sku": "C27030_MANN-FILTER",
+      "type": "Air Filter",
+      "urlKey": "c27030_mann-filter",
+      "notes": [],
+      "fitsFrom": "1900-01-01",
+      "fitsTo": "9999-12-31"
+    }
+  ],
+  "filters": [
+    { "code": "ALL_FILTER", "label": "All", "total": 7 },
+    { "code": "AIR_FILTER", "label": "Air Filter", "total": 1 }
+  ],
+  "totalCount": 7,
+  "error": null
+}
+```
+
+Ficha / equivalencias (FRAM, WIX, etc.) con cache LRU 6 h:
+
+```http
+POST /api/mann/resolve
+Content-Type: application/json
+
+{ "codes": ["C 27 030", "C27030_MANN-FILTER"] }
+```
+
+```json
+{
+  "items": {
+    "C 27 030": {
+      "mannCode": "C27030",
+      "sku": "C27030_MANN-FILTER",
+      "imageUrl": null,
+      "framCodes": ["CA11654", "CA12143"],
+      "wegaCodes": [],
+      "equivalencias": [
+        { "brand": "FRAM", "code": "CA11654" },
+        { "brand": "WIX", "code": "WA9770" }
+      ]
+    }
+  },
+  "error": null
+}
+```
+
 ### FRAM
 
 Catálogo de filtros por marca, modelo y versión. Scraper de `https://catalogofram.com.ar`.
