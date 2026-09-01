@@ -36,20 +36,20 @@ const HTML = `
 
 describe("parseProductDetail", () => {
   it("maps WEGA code to FRAM and desktop image", () => {
-    const product = parseProductDetail(HTML, "https://www.wega.com.ar");
+    const product = parseProductDetail(HTML, "https://wega.com.ar");
     assert.ok(product);
     assert.equal(product.wegaCode, "FAP-2219");
     assert.equal(product.framCode, "CA 12104");
     assert.deepEqual(product.framCodes, ["CA 12104", "CA 9411"]);
     assert.equal(
       product.imageUrl,
-      "https://www.wega.com.ar/images/productos/ae28769_gd.webp",
+      "https://wega.com.ar/images/productos/ae28769_gd.webp",
     );
     assert.equal(product.equivalencias.length, 4);
   });
 
   it("returns null without a product title", () => {
-    assert.equal(parseProductDetail("<html></html>", "https://www.wega.com.ar"), null);
+    assert.equal(parseProductDetail("<html></html>", "https://wega.com.ar"), null);
   });
 });
 

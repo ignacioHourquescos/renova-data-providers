@@ -84,7 +84,7 @@ El token se obtiene con login automático a `/users/login` y se renueva si la se
 
 ### Wega
 
-Catálogo de filtros por marca y modelo de vehículo. Scraper de `https://www.wega.com.ar/catalogo`.
+Catálogo de filtros por marca y modelo de vehículo. Scraper de `https://wega.com.ar/catalogo`.
 Los valores `make` / `model` / `id` son **IDs numéricos internos de Wega** (ej: PEUGEOT = `"177"`), no nombres.
 Cada modelo incluye `tipoVehiculo` (`1` auto, `2` utilitario/camioneta, `3` pesado). El catálogo prueba esos tipos si no viene `tipoVehiculo` en el body (necesario para Hilux y similares).
 
@@ -140,7 +140,7 @@ Content-Type: application/json
     "FAP-2219": {
       "wegaCode": "FAP-2219",
       "framCode": "CA 12104",
-      "imageUrl": "https://www.wega.com.ar/images/productos/....webp",
+      "imageUrl": "https://wega.com.ar/images/productos/....webp",
       "equivalencias": [
         { "brand": "WEGA", "code": "FAP-2219" },
         { "brand": "FRAM", "code": "CA 12104" }

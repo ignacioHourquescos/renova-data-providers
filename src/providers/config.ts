@@ -30,9 +30,9 @@ export const providers = {
   wega: {
     id: "wega",
     name: "Wega",
-    baseUrl: "https://www.wega.com.ar",
-    origin: "https://www.wega.com.ar",
-    referer: "https://www.wega.com.ar/catalogo",
+    baseUrl: "https://wega.com.ar",
+    origin: "https://wega.com.ar",
+    referer: "https://wega.com.ar/catalogo",
   },
   fram: {
     id: "fram",
