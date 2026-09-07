@@ -49,6 +49,15 @@ export const providers = {
     referer: "https://www.mann-filter.com/ar-es/catalogo.html",
     graphqlUrl: "https://www.mann-filter.com/api/graphql/catalog-prod",
   },
+  goicoechea: {
+    id: "goicoechea",
+    name: "Goicoechea",
+    baseUrl: "https://goicoechea.com.ar",
+    origin: "https://goicoechea.com.ar",
+    referer: "https://goicoechea.com.ar/cuenta/buscador",
+    username: "renovafiltros@gmail.com",
+    password: "4d7f4c38",
+  },
 } as const;
 
 export type WegaProviderConfig = (typeof providers)["wega"];

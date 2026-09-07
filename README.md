@@ -82,6 +82,41 @@ Respuesta OK:
 Config de scrapers (URL, descuento, credenciales): `src/providers/config.ts`.
 El token se obtiene con login automático a `/users/login` y se renueva si la sesión expira.
 
+### Goicoechea
+
+Busca un artículo por código en `goicoechea.com.ar` (login con cookies + API JSON del buscador).
+El **Costo** de la ficha se devuelve en `price` tal cual (neto, sin descuento extra). `listPrice` es Lista.
+El stock se consulta para `quantity` (default 1). `inStock: true` si hay stock suficiente para esa cantidad.
+
+```http
+POST /api/goicoechea/search
+Content-Type: application/json
+
+{ "code": "AL12", "quantity": 1000 }
+```
+
+Respuesta OK:
+
+```json
+{
+  "items": [
+    {
+      "code": "AL12",
+      "name": "FILTRO SECADOR AIRE MERCEDES BENZ VOLVO IVECO MAN",
+      "brand": "MAHLE",
+      "price": 24739.32,
+      "listPrice": 34360.16,
+      "inStock": true,
+      "stockLabel": "Stock Suficiente",
+      "quantity": 1000
+    }
+  ],
+  "error": null
+}
+```
+
+Si el código no está, `items` viene vacío y `error` es `null`. Credenciales en `src/providers/config.ts`.
+
 ### Wega
 
 Catálogo de filtros por marca y modelo de vehículo. Scraper de `https://wega.com.ar/catalogo`.
@@ -350,4 +385,4 @@ Healthcheck: `GET http://localhost:3100/health`
 | `RECAPTCHA_SOLVER_API_KEY` | API key de 2captcha |
 | `LOG_LEVEL` | Nivel de log pino (default `info`) |
 
-URL, credenciales y descuento de Lubaires viven en `src/providers/config.ts`.
+URL, credenciales y descuento de Lubaires, y credenciales de Goicoechea, viven en `src/providers/config.ts`.

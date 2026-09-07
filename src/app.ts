@@ -5,6 +5,7 @@ import { lubairesRouter } from "./routes/lubaires.js";
 import { wegaRouter } from "./routes/wega.js";
 import { framRouter } from "./routes/fram.js";
 import { mannRouter } from "./routes/mann.js";
+import { goicoecheaRouter } from "./routes/goicoechea.js";
 
 export function createApp() {
   const app = express();
@@ -21,6 +22,7 @@ export function createApp() {
   app.use("/api/wega", wegaRouter);
   app.use("/api/fram", framRouter);
   app.use("/api/mann", mannRouter);
+  app.use("/api/goicoechea", goicoecheaRouter);
 
   return app;
 }
