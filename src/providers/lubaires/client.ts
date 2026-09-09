@@ -71,13 +71,20 @@ function fetchArticles(url: string, token: string): Promise<Response> {
   });
 }
 
+function stripPackSuffix(code: string): string {
+  return String(code || "").replace(/\s*\(\d+\)\s*$/g, "").trim();
+}
+
 export function parseArticle(raw: LubairesApiArticle): LubairesArticle {
   const providerPrice = toNumber(
     raw.priceToShow ?? raw.finalPrice ?? raw.netPricePaymentConditionIva,
   );
 
   return {
-    code: raw.supplier_code?.trim() || raw.titleToShow?.trim() || null,
+    code:
+      stripPackSuffix(raw.supplier_code || "") ||
+      stripPackSuffix(raw.titleToShow || "") ||
+      null,
     name:
       raw.descriptionToShow?.trim() ||
       raw.name?.trim() ||

@@ -7,6 +7,10 @@ import {
   listModels,
   resolveProducts,
 } from "../providers/wega/index.js";
+import {
+  ingestPriceList,
+  lookupPrice,
+} from "../providers/wega/priceList.js";
 
 export const wegaRouter = Router();
 
@@ -89,6 +93,93 @@ wegaRouter.post("/catalogue", async (req, res) => {
     const message = err instanceof Error ? err.message : String(err);
     logger.error({ make, model, err: message }, "Wega catalogue route error");
     return res.json({ headers: [], rows: [], error: message });
+  }
+});
+
+const priceBodySchema = z.object({
+  code: z.string().min(1).optional(),
+  query: z.string().min(1).optional(),
+});
+
+const priceListBodySchema = z.object({
+  fileUrl: z.string().trim().min(1).optional(),
+  codeColumn: z.string().trim().min(1).optional(),
+  priceColumn: z.string().trim().min(1).optional(),
+  discountPercent: z.coerce.number(),
+  monthKey: z.union([z.string(), z.number()]).transform(String).optional(),
+});
+
+const PRICE_LIST_TIMEOUT_MS = 55_000;
+
+wegaRouter.post("/price-list", async (req, res) => {
+  const parsed = priceListBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({
+      rowCount: 0,
+      monthKey: null,
+      discountPercent: null,
+      error:
+        "Body inválido. Esperado: { fileUrl, codeColumn, priceColumn, discountPercent } o { discountPercent }",
+    });
+  }
+
+  logger.info(
+    {
+      hasFile: Boolean(parsed.data.fileUrl),
+      monthKey: parsed.data.monthKey,
+      discountPercent: parsed.data.discountPercent,
+    },
+    "Wega price list ingest requested",
+  );
+
+  try {
+    const result = await Promise.race([
+      ingestPriceList(parsed.data),
+      rejectAfter(
+        PRICE_LIST_TIMEOUT_MS,
+        `Timeout: la carga tardó más de ${PRICE_LIST_TIMEOUT_MS / 1000} segundos`,
+      ),
+    ]);
+    const status = result.error ? 400 : 200;
+    return res.status(status).json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error({ err: message }, "Wega price list ingest error");
+    return res.status(500).json({
+      rowCount: 0,
+      monthKey: null,
+      discountPercent: parsed.data.discountPercent,
+      error: message,
+    });
+  }
+});
+
+wegaRouter.post("/price", async (req, res) => {
+  const parsed = priceBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({
+      items: [],
+      error: "Body inválido. Esperado: { code: string } o { query: string }",
+    });
+  }
+
+  const query = (parsed.data.code ?? parsed.data.query)?.trim();
+  if (!query) {
+    return res.status(400).json({
+      items: [],
+      error: "Body inválido. Esperado: { code: string } o { query: string }",
+    });
+  }
+
+  logger.info({ query }, "Wega price requested");
+
+  try {
+    const result = await lookupPrice(query);
+    return res.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error({ query, err: message }, "Wega price route error");
+    return res.json({ items: [], error: message });
   }
 });
 

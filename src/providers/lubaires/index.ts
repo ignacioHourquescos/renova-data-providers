@@ -1,6 +1,6 @@
 import { logger } from "../../lib/logger.js";
 import { parseArticle, searchArticles } from "./client.js";
-import type { LubairesArticle, LubairesBrand, LubairesSearchResult } from "./types.js";
+import type { LubairesBrand, LubairesSearchResult } from "./types.js";
 
 export type { LubairesBrand };
 
@@ -22,7 +22,7 @@ export async function searchByCode(
     const raw = await searchArticles(q);
     const items = raw
       .map(parseArticle)
-      .filter((item) => matchesBrand(item, brand) && isExactCodeMatch(item.code, q));
+      .filter((item) => matchesBrand(item.brand, brand) && isExactCodeMatch(item.code, q));
 
     logger.info(
       { query: q, brand, count: items.length, rawCount: raw.length },
@@ -36,13 +36,24 @@ export async function searchByCode(
   }
 }
 
-function matchesBrand(item: LubairesArticle, brand: LubairesBrand): boolean {
-  return (item.brand ?? "").trim().toUpperCase() === brand;
+/** Lubaires manda "MANN FILTER" / "MANN-FILTER"; pedimos MANN o WIX. */
+export function matchesBrand(brandName: string | null | undefined, brand: LubairesBrand): boolean {
+  const raw = String(brandName || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+  if (!raw) return false;
+  return raw === brand || raw.startsWith(brand);
+}
+
+/** "C 2295/2 (10)" → "C 2295/2" (el (10) es presentación, no el código). */
+export function stripPackSuffix(code: string): string {
+  return String(code || "").replace(/\s*\(\d+\)\s*$/g, "").trim();
 }
 
 /** Compara códigos ignorando espacios, guiones, barras y mayúsculas/minúsculas. */
 export function normalizeCode(code: string): string {
-  return code.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+  return stripPackSuffix(code).replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
 }
 
 export function isExactCodeMatch(

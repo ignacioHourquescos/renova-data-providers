@@ -188,6 +188,54 @@ Content-Type: application/json
 
 Si un código no tiene FRAM o la ficha no existe, `framCode` e `imageUrl` vienen `null`. Máximo 60 códigos por request, 4 scrapes en paralelo.
 
+Precio de lista del proveedor (Excel subida en Listas de precios). **No hay stock.** `price` es el costo = lista × (1 − descuento). Hay que ingestar la Excel antes de consultar.
+
+```http
+POST /api/wega/price-list
+Content-Type: application/json
+
+{
+  "fileUrl": "https://.../Lista_de_Precios_Mayo.xlsx",
+  "codeColumn": "CODIGO",
+  "priceColumn": "PRECIO",
+  "discountPercent": 53,
+  "monthKey": "2026-05"
+}
+```
+
+Solo actualizar el descuento (sin re-bajar el archivo):
+
+```http
+POST /api/wega/price-list
+Content-Type: application/json
+
+{ "discountPercent": 53 }
+```
+
+```http
+POST /api/wega/price
+Content-Type: application/json
+
+{ "code": "JFO0514" }
+```
+
+```json
+{
+  "items": [
+    {
+      "code": "JFO 0514",
+      "brand": "WEGA",
+      "price": 7173.08,
+      "listPrice": 15261.88,
+      "discountPercent": 53
+    }
+  ],
+  "error": null
+}
+```
+
+Si el código no está, `items` viene vacío y `error` es `null`. Si no hay lista ingestada, `error` lo indica. Sin `stockLabel` / `inStock`.
+
 ### MANN-FILTER
 
 Catálogo de filtros por marca → modelo → versión (motor), vía GraphQL de `https://www.mann-filter.com` (`/api/graphql/catalog-prod`).
