@@ -6,6 +6,7 @@ import { wegaRouter } from "./routes/wega.js";
 import { framRouter } from "./routes/fram.js";
 import { mannRouter } from "./routes/mann.js";
 import { goicoecheaRouter } from "./routes/goicoechea.js";
+import { afipRouter } from "./routes/afip.js";
 
 export function createApp() {
   const app = express();
@@ -23,6 +24,7 @@ export function createApp() {
   app.use("/api/fram", framRouter);
   app.use("/api/mann", mannRouter);
   app.use("/api/goicoechea", goicoecheaRouter);
+  app.use("/api/afip", afipRouter);
 
   return app;
 }
