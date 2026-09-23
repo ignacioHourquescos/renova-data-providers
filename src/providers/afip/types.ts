@@ -11,12 +11,25 @@ export type AfipActividad = {
 
 export type AfipDomicilio = {
   texto: string | null;
+  calle: string | null;
+  localidad: string | null;
+  provincia: string | null;
+  codigoPostal: string | null;
 };
+
+export type AfipCondicionFiscal =
+  | "MONOTRIBUTO"
+  | "RESPONSABLE_INSCRIPTO"
+  | "EXENTO"
+  | "NO_INSCRIPTO"
+  | null;
 
 export type AfipConstancia = {
   cuit: string;
   denominacion: string | null;
   tipoPersona: string | null;
+  condicionFiscal: AfipCondicionFiscal;
+  categoriaMonotributo: string | null;
   fechaContratoSocial: string | null;
   impuestos: AfipImpuesto[];
   actividades: AfipActividad[];

@@ -3,10 +3,10 @@ import { solveImageCaptcha } from "./captcha.js";
 import {
   createSession,
   fetchCaptcha,
-  fetchConstanciaHtml,
+  fetchConstanciaPages,
   submitConsulta,
 } from "./client.js";
-import { parseConstanciaHtml } from "./parse.js";
+import { emptyConstancia, parseConstanciaHtml } from "./parse.js";
 import type { AfipConstancia } from "./types.js";
 
 const RETRY_DELAY_MS = () => 4000 + Math.random() * 2000;
@@ -29,11 +29,22 @@ export async function fetchConstanciaByCuit(
       const challenge = await fetchCaptcha(jar);
       const solution = await solveImageCaptcha(challenge.imageBase64);
       const redirect = await submitConsulta(jar, cuit, challenge.token, solution);
-      const html = await fetchConstanciaHtml(jar, redirect);
+      const html = await fetchConstanciaPages(jar, redirect);
       const parsed = parseConstanciaHtml(html, cuit);
 
-      if (parsed.denominacion || /CONSTANCIA DE INSCRIPC/i.test(html)) {
-        logger.info({ cuit, denominacion: parsed.denominacion }, "AFIP constancia OK");
+      if (
+        parsed.denominacion ||
+        parsed.condicionFiscal ||
+        /CONSTANCIA DE INSCRIPC|CONSTANCIA DE OPCI/i.test(html)
+      ) {
+        logger.info(
+          {
+            cuit,
+            denominacion: parsed.denominacion,
+            condicionFiscal: parsed.condicionFiscal,
+          },
+          "AFIP constancia OK",
+        );
         return parsed;
       }
 
@@ -45,32 +56,12 @@ export async function fetchConstanciaByCuit(
       logger.error({ attempt, cuit, err: message }, "AFIP constancia error");
 
       if (attempt === maxAttempts) {
-        return {
-          cuit,
-          denominacion: null,
-          tipoPersona: null,
-          fechaContratoSocial: null,
-          impuestos: [],
-          actividades: [],
-          domicilioFiscal: { texto: null },
-          html: null,
-          error: message,
-        };
+        return emptyConstancia(cuit, null, message);
       }
     }
   }
 
-  return {
-    cuit,
-    denominacion: null,
-    tipoPersona: null,
-    fechaContratoSocial: null,
-    impuestos: [],
-    actividades: [],
-    domicilioFiscal: { texto: null },
-    html: null,
-    error: "No se pudo obtener la constancia",
-  };
+  return emptyConstancia(cuit, null, "No se pudo obtener la constancia");
 }
 
 function sleep(ms: number): Promise<void> {

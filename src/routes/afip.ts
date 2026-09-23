@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { isValidCuit, normalizeCuit } from "../lib/cuit.js";
 import { logger } from "../lib/logger.js";
+import { emptyConstancia } from "../providers/afip/parse.js";
 import { fetchConstanciaByCuit } from "../providers/afip/index.js";
 
 export const afipRouter = Router();
@@ -15,32 +16,20 @@ const ENDPOINT_TIMEOUT_MS = 240_000;
 afipRouter.post("/constancia", async (req, res) => {
   const parsed = bodySchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({
-      cuit: null,
-      denominacion: null,
-      tipoPersona: null,
-      fechaContratoSocial: null,
-      impuestos: [],
-      actividades: [],
-      domicilioFiscal: { texto: null },
-      html: null,
-      error: "Body inválido. Esperado: { cuit: string }",
-    });
+    return res.status(400).json(
+      emptyConstancia("", null, "Body inválido. Esperado: { cuit: string }"),
+    );
   }
 
   const cuit = normalizeCuit(parsed.data.cuit);
   if (!isValidCuit(cuit)) {
-    return res.status(400).json({
-      cuit,
-      denominacion: null,
-      tipoPersona: null,
-      fechaContratoSocial: null,
-      impuestos: [],
-      actividades: [],
-      domicilioFiscal: { texto: null },
-      html: null,
-      error: "CUIT inválido. Debe tener 11 dígitos y dígito verificador correcto",
-    });
+    return res.status(400).json(
+      emptyConstancia(
+        cuit,
+        null,
+        "CUIT inválido. Debe tener 11 dígitos y dígito verificador correcto",
+      ),
+    );
   }
 
   logger.info({ cuit }, "AFIP constancia requested");
@@ -57,17 +46,7 @@ afipRouter.post("/constancia", async (req, res) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     logger.error({ cuit, err: message }, "AFIP route error");
-    return res.json({
-      cuit,
-      denominacion: null,
-      tipoPersona: null,
-      fechaContratoSocial: null,
-      impuestos: [],
-      actividades: [],
-      domicilioFiscal: { texto: null },
-      html: null,
-      error: message,
-    });
+    return res.json(emptyConstancia(cuit, null, message));
   }
 });
 

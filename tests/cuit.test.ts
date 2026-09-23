@@ -51,6 +51,31 @@ describe("afip parse", () => {
     assert.equal(parsed.impuestos[0]?.descripcion, "IVA");
     assert.equal(parsed.actividades[0]?.codigo, "591110");
     assert.match(parsed.domicilioFiscal.texto ?? "", /ALVAREZ THOMAS/);
+    assert.equal(parsed.domicilioFiscal.provincia, "CIUDAD AUTONOMA BUENOS AIRES");
+    assert.equal(parsed.error, null);
+  });
+
+  it("extracts monotributo name, category and address", () => {
+    const html = `
+      <B>CONSTANCIA DE OPCI&Oacute;N</B>
+      <FONT>CUIT:</FONT>
+      <FONT>20-32318993-9</FONT>
+      <FONT>PEREZ JUAN</FONT>
+      <FONT>CALLE FALSA 123</FONT>
+      <FONT>CORDOBA</FONT>
+      <FONT>5000-CORDOBA</FONT>
+      <FONT>496 - MONOTRIBUTO</FONT>
+      CATEGORÍA
+      <FONT style="FONT-SIZE: 40pt">C</FONT>
+      <!-- Esta es la descripcion de la categoria -->
+      <FONT>SERVICIOS DE TALLER MECANICO</FONT>
+    `;
+    const parsed = parseConstanciaHtml(html, "20323189939");
+    assert.equal(parsed.denominacion, "PEREZ JUAN");
+    assert.equal(parsed.condicionFiscal, "MONOTRIBUTO");
+    assert.equal(parsed.categoriaMonotributo, "C");
+    assert.equal(parsed.domicilioFiscal.provincia, "CORDOBA");
+    assert.equal(parsed.actividades[0]?.descripcion, "SERVICIOS DE TALLER MECANICO");
     assert.equal(parsed.error, null);
   });
 });

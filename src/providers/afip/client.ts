@@ -169,5 +169,41 @@ export async function fetchConstanciaHtml(
     );
   }
 
-  return await response.text();
+  const buffer = Buffer.from(await response.arrayBuffer());
+  return new TextDecoder("latin1").decode(buffer);
+}
+
+export async function fetchConstanciaPages(
+  jar: CookieJar,
+  redirect: string,
+): Promise<string> {
+  const first = await fetchConstanciaHtml(jar, redirect);
+  if (!/ConstanciaSelector|tipoConstanciaSelector/i.test(`${redirect}\n${first}`)) {
+    return first;
+  }
+
+  const pages: string[] = [first];
+  for (const next of ["./ConstanciaOpcionBody.jsp", "./ConstanciaInscripcionBody.jsp"]) {
+    try {
+      const html = await fetchConstanciaHtml(jar, next);
+      if (/CONSTANCIA DE INSCRIPC|CONSTANCIA DE OPCI|MONOTRIBUTO/i.test(html)) {
+        pages.push(html);
+      }
+    } catch {
+      // El selector a veces solo tiene una de las dos
+    }
+  }
+
+  const scored = pages
+    .map((html) => ({
+      html,
+      score:
+        (/CONSTANCIA DE OPCI/i.test(html) ? 3 : 0) +
+        (/CONSTANCIA DE INSCRIPC/i.test(html) ? 2 : 0) +
+        (/MONOTRIBUTO/i.test(html) ? 2 : 0) +
+        (html.length > 4000 ? 1 : 0),
+    }))
+    .sort((a, b) => b.score - a.score);
+
+  return scored[0]?.html ?? first;
 }
