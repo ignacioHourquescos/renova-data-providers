@@ -7,6 +7,7 @@ import { framRouter } from "./routes/fram.js";
 import { mannRouter } from "./routes/mann.js";
 import { goicoecheaRouter } from "./routes/goicoechea.js";
 import { afipRouter } from "./routes/afip.js";
+import { eagleRouter } from "./routes/eagle.js";
 
 export function createApp() {
   const app = express();
@@ -25,6 +26,7 @@ export function createApp() {
   app.use("/api/mann", mannRouter);
   app.use("/api/goicoechea", goicoecheaRouter);
   app.use("/api/afip", afipRouter);
+  app.use("/api/eagle", eagleRouter);
 
   return app;
 }

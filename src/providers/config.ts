@@ -58,6 +58,12 @@ export const providers = {
     username: "renovafiltros@gmail.com",
     password: "4d7f4c38",
   },
+  eagle: {
+    id: "eagle",
+    name: "Eagle",
+    baseUrl: "https://eagle-stock.up.railway.app",
+    apiKey: "eagle_yZTsBJnYCKWrf_WaY_POyE58jfD3NMKTwLg4IwE5MLI",
+  },
 } as const;
 
 export type WegaProviderConfig = (typeof providers)["wega"];

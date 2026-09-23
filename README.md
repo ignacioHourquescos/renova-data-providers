@@ -117,6 +117,45 @@ Respuesta OK:
 
 Si el código no está, `items` viene vacío y `error` es `null`. Credenciales en `src/providers/config.ts`.
 
+### Eagle
+
+Stock de fábrica publicado en `https://eagle-stock.up.railway.app` (`GET /api/v1/stock`).
+La búsqueda compara el código ignorando espacios, guiones y mayúsculas, igual que Eagle.
+No hay precio: `quantity` es el stock (o `null` con `quantityLabel` «Más de 100» cuando Eagle oculta el número).
+`inStock` indica si ese stock alcanza `quantity` del body (default 1). Si el número está oculto y se piden más de 100, `inStock` es `null`.
+`brand` sale de un campo `Marca` o, si no hay, de la columna de almacén (ahí Eagle ya reemplazó el código de depósito por la marca).
+
+```http
+POST /api/eagle/search
+Content-Type: application/json
+
+{ "code": "C-4880 A", "quantity": 1 }
+```
+
+Respuesta OK:
+
+```json
+{
+  "items": [
+    {
+      "code": "C-4880 A",
+      "name": "U.S. PARA COMBUSTIBLE",
+      "brand": "FRAM",
+      "quantity": null,
+      "quantityLabel": "Más de 100",
+      "requested": 1,
+      "inStock": true,
+      "stockLabel": "Más de 100",
+      "fields": { "Almacen": "FRAM" }
+    }
+  ],
+  "updatedAt": "2026-09-23T12:00:00.000Z",
+  "error": null
+}
+```
+
+Si el código no está, `items` viene vacío y `error` es `null`. La API key está en `src/providers/config.ts` (se puede pisar con `EAGLE_API_KEY`).
+
 ### Wega
 
 Catálogo de filtros por marca y modelo de vehículo. Scraper de `https://wega.com.ar/catalogo`.
