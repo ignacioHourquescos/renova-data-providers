@@ -452,6 +452,38 @@ Content-Type: application/json
 }
 ```
 
+Dimensiones y aplicaciones de la misma ficha. Cache LRU aparte (6 h), máximo 60 códigos, 4 scrapes en paralelo:
+
+```http
+POST /api/fram/specifications
+Content-Type: application/json
+
+{ "codes": ["CH9973"] }
+```
+
+```json
+{
+  "items": {
+    "CH9973": {
+      "framCode": "CH9973",
+      "name": "FILTRO DE ACEITE DE MOTOR",
+      "dimensions": [
+        { "label": "TIPO", "value": "CARTUCHO" },
+        { "label": "ALTURA", "value": "69mm" },
+        { "label": "DIÁMETRO INTERIOR", "value": "24-24mm" }
+      ],
+      "applications": [
+        "CITROEN C5 AIRCROSS 1.6 THP 156CV NAFTA 2020 a",
+        "CITROEN BERLINGO FURGON 1.4I NAFTA 2015 a 2022"
+      ]
+    }
+  },
+  "error": null
+}
+```
+
+Las medidas salen como pares `label` / `value` porque cambian según el filtro (un panel trae `LARGO` y `ANCHO`, un cartucho trae `DIÁMETRO INTERIOR`). Las aplicaciones quedan como texto, sin partir marca ni modelo. Si el código no existe, `name` es `null` y las dos listas vienen vacías.
+
 ## Setup local
 
 ```bash

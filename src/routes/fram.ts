@@ -3,6 +3,7 @@ import { z } from "zod";
 import { logger } from "../lib/logger.js";
 import {
   getCatalogue,
+  getSpecifications,
   listMakes,
   listModels,
   listVersions,
@@ -139,6 +140,34 @@ framRouter.post("/resolve", async (req, res) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     logger.error({ err: message, count: codes.length }, "FRAM resolve route error");
+    return res.json({ items: {}, error: message });
+  }
+});
+
+framRouter.post("/specifications", async (req, res) => {
+  const parsed = resolveBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({
+      items: {},
+      error: "Body inválido. Esperado: { codes: string[] }",
+    });
+  }
+
+  const { codes } = parsed.data;
+  logger.info({ count: codes.length }, "FRAM specifications requested");
+
+  try {
+    const result = await Promise.race([
+      getSpecifications(codes),
+      rejectAfter(ENDPOINT_TIMEOUT_MS, timeoutMessage()),
+    ]);
+    return res.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error(
+      { err: message, count: codes.length },
+      "FRAM specifications route error",
+    );
     return res.json({ items: {}, error: message });
   }
 });

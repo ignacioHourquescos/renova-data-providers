@@ -50,3 +50,20 @@ export type FramResolveResult = {
   items: Record<string, FramResolvedProduct>;
   error: string | null;
 };
+
+export type FramDimension = {
+  label: string;
+  value: string;
+};
+
+export type FramSpecification = {
+  framCode: string;
+  name: string | null;
+  dimensions: FramDimension[];
+  applications: string[];
+};
+
+export type FramSpecificationsResult = {
+  items: Record<string, FramSpecification>;
+  error: string | null;
+};

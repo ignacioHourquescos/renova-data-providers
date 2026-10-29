@@ -7,6 +7,7 @@ import {
 } from "./client.js";
 import { FRAM_MAKES } from "./makes.js";
 import { resolveProducts } from "./resolve.js";
+import { getSpecifications } from "./specifications.js";
 import type {
   FramCatalogueResult,
   FramMakesResult,
@@ -16,7 +17,7 @@ import type {
   FramVersionsResult,
 } from "./types.js";
 
-export { resolveProducts };
+export { resolveProducts, getSpecifications };
 
 const MODELS_CACHE_MAX = 200;
 const MODELS_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
