@@ -45,7 +45,7 @@ export function parseProductDetail(
   return {
     framCode,
     wegaCode: wega?.code || null,
-    imageUrl: extractImageUrl(item, baseUrl),
+    imageUrl: extractFramImageUrl(item, baseUrl),
     equivalencias,
   };
 }
@@ -73,7 +73,7 @@ function extractEquivalencias(
   return items;
 }
 
-function extractImageUrl(
+export function extractFramImageUrl(
   item: Cheerio<Element>,
   baseUrl: string,
 ): string | null {

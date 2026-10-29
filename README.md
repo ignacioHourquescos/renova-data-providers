@@ -467,6 +467,7 @@ Content-Type: application/json
     "CH9973": {
       "framCode": "CH9973",
       "name": "FILTRO DE ACEITE DE MOTOR",
+      "imageUrl": "https://production-specparts-search-api-images-bucket.s3.amazonaws.com/...",
       "dimensions": [
         { "label": "TIPO", "value": "CARTUCHO" },
         { "label": "ALTURA", "value": "69mm" },
@@ -482,7 +483,7 @@ Content-Type: application/json
 }
 ```
 
-Las medidas salen como pares `label` / `value` porque cambian según el filtro (un panel trae `LARGO` y `ANCHO`, un cartucho trae `DIÁMETRO INTERIOR`). Las aplicaciones quedan como texto, sin partir marca ni modelo. Si el código no existe, `name` es `null` y las dos listas vienen vacías.
+`imageUrl` es la foto del artículo, ya desempaquetada del proxy `/img` de FRAM. Las medidas salen como pares `label` / `value` porque cambian según el filtro (un panel trae `LARGO` y `ANCHO`, un cartucho trae `DIÁMETRO INTERIOR`). Las aplicaciones quedan como texto, sin partir marca ni modelo. Si el código no existe, `name` e `imageUrl` son `null` y las dos listas vienen vacías.
 
 ## Setup local
 

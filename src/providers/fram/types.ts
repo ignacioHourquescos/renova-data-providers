@@ -59,6 +59,7 @@ export type FramDimension = {
 export type FramSpecification = {
   framCode: string;
   name: string | null;
+  imageUrl: string | null;
   dimensions: FramDimension[];
   applications: string[];
 };

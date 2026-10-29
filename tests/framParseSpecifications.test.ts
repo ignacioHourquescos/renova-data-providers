@@ -2,10 +2,15 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { parseSpecifications } from "../src/providers/fram/parseSpecifications.js";
 
+const BASE = "https://catalogofram.com.ar";
+
 const OIL_HTML = `
 <html>
   <div class="result-list">
     <div class="result-item">
+      <div class="cross-image">
+        <img src="https://catalogofram.com.ar/img?url=https%3A%2F%2Fimages.example.com%2Fch9973.JPG">
+      </div>
       <div class="cross-information">
         <div class="title">FILTRO DE ACEITE DE MOTOR: CH9973</div>
         <div class="first-description">
@@ -54,10 +59,11 @@ const AIR_HTML = `
 
 describe("parseSpecifications FRAM", () => {
   it("lee nombre, dimensiones y aplicaciones de un cartucho", () => {
-    const spec = parseSpecifications(OIL_HTML);
+    const spec = parseSpecifications(OIL_HTML, BASE);
     assert.ok(spec);
     assert.equal(spec.framCode, "CH9973");
     assert.equal(spec.name, "FILTRO DE ACEITE DE MOTOR");
+    assert.equal(spec.imageUrl, "https://images.example.com/ch9973.JPG");
     assert.deepEqual(spec.dimensions, [
       { label: "TIPO", value: "CARTUCHO" },
       { label: "ALTURA", value: "69mm" },
@@ -70,10 +76,11 @@ describe("parseSpecifications FRAM", () => {
   });
 
   it("acepta medidas de un filtro de aire", () => {
-    const spec = parseSpecifications(AIR_HTML);
+    const spec = parseSpecifications(AIR_HTML, BASE);
     assert.ok(spec);
     assert.equal(spec.framCode, "CA11072");
     assert.equal(spec.name, "FILTRO DE AIRE");
+    assert.equal(spec.imageUrl, null);
     assert.deepEqual(spec.dimensions, [
       { label: "TIPO", value: "PANEL" },
       { label: "LARGO", value: "348mm" },
@@ -87,7 +94,7 @@ describe("parseSpecifications FRAM", () => {
 
   it("devuelve null sin result-item", () => {
     assert.equal(
-      parseSpecifications("<html>No hay resultados</html>"),
+      parseSpecifications("<html>No hay resultados</html>", BASE),
       null,
     );
   });

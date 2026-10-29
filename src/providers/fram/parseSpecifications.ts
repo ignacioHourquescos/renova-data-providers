@@ -1,17 +1,22 @@
 import { load, type Cheerio, type CheerioAPI } from "cheerio";
 import type { Element } from "domhandler";
+import { extractFramImageUrl } from "./parseProduct.js";
 import type { FramDimension, FramSpecification } from "./types.js";
 
 export function emptySpecification(code: string): FramSpecification {
   return {
     framCode: String(code ?? "").trim() || code,
     name: null,
+    imageUrl: null,
     dimensions: [],
     applications: [],
   };
 }
 
-export function parseSpecifications(html: string): FramSpecification | null {
+export function parseSpecifications(
+  html: string,
+  baseUrl: string,
+): FramSpecification | null {
   const $ = load(html);
   const item = $(".result-list .result-item").first();
   if (!item.length) return null;
@@ -25,6 +30,7 @@ export function parseSpecifications(html: string): FramSpecification | null {
   return {
     framCode,
     name: name || null,
+    imageUrl: extractFramImageUrl(item, baseUrl),
     dimensions: extractDimensions($, item),
     applications: extractApplications($, item),
   };

@@ -1,5 +1,6 @@
 import { logger } from "../../lib/logger.js";
 import { LruCache } from "../../lib/lruCache.js";
+import { providers } from "../config.js";
 import { fetchProductHtml } from "./client.js";
 import { normalizeFramCode } from "./parseProduct.js";
 import { emptySpecification, parseSpecifications } from "./parseSpecifications.js";
@@ -68,7 +69,9 @@ async function fetchAndCache(
 ): Promise<FramSpecification> {
   try {
     const html = await fetchProductHtml(code);
-    const parsed = html ? parseSpecifications(html) : null;
+    const parsed = html
+      ? parseSpecifications(html, providers.fram.baseUrl)
+      : null;
     const spec = parsed ?? emptySpecification(code);
     cache.set(key, spec);
     return spec;
