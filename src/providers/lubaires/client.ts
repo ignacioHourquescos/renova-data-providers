@@ -1,5 +1,6 @@
 import { logger } from "../../lib/logger.js";
 import { applyDiscount, providers } from "../config.js";
+import { getFixedMarkupPercent } from "../pricing.js";
 import { clearAccessToken, getAccessToken } from "./auth.js";
 import type { LubairesApiArticle, LubairesArticle } from "./types.js";
 
@@ -96,6 +97,7 @@ export function parseArticle(raw: LubairesApiArticle): LubairesArticle {
     listPrice: toNumber(raw.listPrice ?? raw.price),
     publicPrice: toNumber(raw.suggestedPrice),
     discountPercent: config.discountPercent,
+    markupPercent: getFixedMarkupPercent("lubaires") ?? 0,
     stockLabel: raw.available?.label?.trim() || null,
     stockStatus: raw.available?.status?.trim() || null,
     isOffer: Boolean(raw.isOffer),

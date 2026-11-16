@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import * as XLSX from "xlsx";
 import { applyDiscount } from "../config.js";
+import { getFixedMarkupPercent } from "../pricing.js";
 import { logger } from "../../lib/logger.js";
 import { fetchWegaLatestFromFirestore } from "./firestoreSync.js";
 import { normalizeWegaCode } from "./parseProduct.js";
@@ -12,6 +13,8 @@ export type WegaPriceArticle = {
   price: number;
   listPrice: number;
   discountPercent: number;
+  /** Markup definido en pricing.ts para el cotizador. */
+  markupPercent: number;
 };
 
 export type WegaPriceSearchResult = {
@@ -520,6 +523,7 @@ export async function lookupPrice(code: string): Promise<WegaPriceSearchResult> 
         price,
         listPrice: row.listPrice,
         discountPercent: currentStore.discountPercent,
+        markupPercent: getFixedMarkupPercent("wega", "WEGA") ?? 0,
       },
     ],
     error: null,

@@ -6,6 +6,8 @@ export type GoicoecheaArticle = {
   price: number | null;
   /** Precio de lista. */
   listPrice: number | null;
+  /** Markup definido en pricing.ts para el cotizador. */
+  markupPercent: number;
   /** true si hay stock suficiente para `quantity`. */
   inStock: boolean | null;
   stockLabel: string | null;

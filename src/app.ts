@@ -8,6 +8,8 @@ import { mannRouter } from "./routes/mann.js";
 import { goicoecheaRouter } from "./routes/goicoechea.js";
 import { afipRouter } from "./routes/afip.js";
 import { eagleRouter } from "./routes/eagle.js";
+import { maxoilRouter } from "./routes/maxoil.js";
+import { pricingRouter } from "./routes/pricing.js";
 
 export function createApp() {
   const app = express();
@@ -19,6 +21,7 @@ export function createApp() {
     res.json({ ok: true, service: "renova-data-providers" });
   });
 
+  app.use("/api/pricing", pricingRouter);
   app.use("/api/dnrpa", dnrpaRouter);
   app.use("/api/lubaires", lubairesRouter);
   app.use("/api/wega", wegaRouter);
@@ -27,6 +30,7 @@ export function createApp() {
   app.use("/api/goicoechea", goicoecheaRouter);
   app.use("/api/afip", afipRouter);
   app.use("/api/eagle", eagleRouter);
+  app.use("/api/maxoil", maxoilRouter);
 
   return app;
 }

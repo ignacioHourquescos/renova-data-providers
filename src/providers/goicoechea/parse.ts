@@ -1,3 +1,4 @@
+import { getFixedMarkupPercent } from "../pricing.js";
 import type { GoicoecheaApiProduct, GoicoecheaArticle } from "./types.js";
 
 const IN_STOCK_STATES = new Set(["1", "12"]);
@@ -61,6 +62,7 @@ export function parseProduct(raw: GoicoecheaApiProduct): GoicoecheaArticle {
     brand: raw.fam_name?.trim() || raw.lin_name?.trim() || null,
     price: deduceCost(raw),
     listPrice: toNumber(raw.prod_listprice),
+    markupPercent: getFixedMarkupPercent("goicoechea") ?? 0,
     inStock: null,
     stockLabel: null,
     quantity: 1,

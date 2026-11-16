@@ -10,6 +10,48 @@ Servicio HTTP que consulta proveedores externos y normaliza la respuesta.
 - zod
 - pino
 
+## Descuentos y markups
+
+Tabla comercial en código (`src/providers/pricing.ts`). Sin base de datos: para cambiar un valor, editá ese archivo y redeploy.
+
+```http
+GET /api/pricing
+```
+
+```json
+{
+  "rules": [
+    {
+      "id": "maxoil-wega",
+      "provider": "maxoil",
+      "brand": "WEGA",
+      "list": "lista_wega_general + kits + economicos",
+      "stock": true,
+      "price": true,
+      "discountPercent": 30,
+      "markupPercent": 15,
+      "priceBase": "listPrice",
+      "notes": "..."
+    }
+  ],
+  "legend": {
+    "stock": "true (✓) si el proveedor nos devuelve stock / disponibilidad.",
+    "price": "true (✓) si el proveedor nos devuelve precio.",
+    "discountPercent": "Porcentaje que este servicio resta sobre la base del proveedor para obtener el costo (`price`).",
+    "markupPercent": "Markup definido acá (fuente de verdad). Va en las respuestas de búsqueda; el cotizador lo aplica sobre el costo."
+  },
+  "error": null
+}
+```
+
+| Columna | Significado |
+|---------|-------------|
+| `stock` / `price` | `true` = ese proveedor nos da ese dato (✓) |
+| `discountPercent` | Se aplica acá al armar el costo (`price`) |
+| `markupPercent` | Se define acá y viaja en cada búsqueda (`markupPercent`); el cotizador lo usa sobre el costo |
+
+Eagle: stock ✓, precio —. Wega Excel: stock —, precio ✓.
+
 ## Proveedores
 
 ### DNRPA
@@ -155,6 +197,50 @@ Respuesta OK:
 ```
 
 Si el código no está, `items` viene vacío y `error` es `null`. La API key está en `src/providers/config.ts` (se puede pisar con `EAGLE_API_KEY`).
+
+### Maxoil
+
+Stock y precio de artículos WEGA en el portal de clientes `https://clientes.maxoil.info` (login con número de cliente + token).
+Maxoil guarda los WEGA con el prefijo `0350` y sin separadores (`FAP-2219` → `0350FAP2219`); el endpoint recibe el código WEGA normal y arma ese código.
+
+**Stock** (`POST /modules/stock/api_stock.php`): no hay cantidad, esta cuenta solo ve el estado. `stockStatus` es el estado tal cual lo devuelve Maxoil (`en_stock`, `poco_stock`, `sin_stock`, `no_disponible`) y `stockLabel` el texto que muestra el portal. `inStock` es `true` para los dos primeros, `false` para `sin_stock` y `null` si Maxoil no lo informa.
+
+**Precio** (Listas de Precios del portal): no hay consulta por código, así que se bajan las listas enteras y quedan en memoria 1 hora. `listPrice` es la columna "$ Lista" y `price` es `listPrice` menos `discountPercent` (hoy **30%**, tabla en `src/providers/pricing.ts`). `closedBoxPrice` es el precio de la lista de caja cerrada, con el mismo descuento, o `null` si el artículo no figura ahí. Se leen las listas general, kits y económicos; quedan afuera lámparas, ATF, bujías y escobillas, que usan otro prefijo.
+Si el artículo no está en las listas, los precios vienen `null`. Si las listas no se pudieron leer, el stock se devuelve igual y el motivo va en `priceError`.
+
+```http
+POST /api/maxoil/wega/search
+Content-Type: application/json
+
+{ "code": "FAP-2219" }
+```
+
+Respuesta OK:
+
+```json
+{
+  "items": [
+    {
+      "code": "FAP-2219",
+      "name": "VW Fox / Suran /",
+      "brand": "WEGA",
+      "inStock": true,
+      "stockLabel": "En stock",
+      "stockStatus": "en_stock",
+      "price": 5441.1,
+      "listPrice": 7773,
+      "discountPercent": 30,
+      "markupPercent": 15,
+      "closedBoxPrice": 4066.3
+    }
+  ],
+  "priceError": null,
+  "error": null
+}
+```
+
+Si el código no está, `items` viene vacío y `error` es `null`. La sesión (cookie + token CSRF) se guarda en memoria y se renueva sola cuando expira.
+Cliente y token están en `src/providers/config.ts` (se pueden pisar con `MAXOIL_CLIENT_CODE` y `MAXOIL_TOKEN`). Descuento/markup: `GET /api/pricing`.
 
 ### Wega
 
@@ -504,5 +590,8 @@ Healthcheck: `GET http://localhost:3100/health`
 | `PORT` | Puerto HTTP (default `3100`) |
 | `RECAPTCHA_SOLVER_API_KEY` | API key de 2captcha |
 | `LOG_LEVEL` | Nivel de log pino (default `info`) |
+| `MAXOIL_CLIENT_CODE` | Opcional: pisa el número de cliente de Maxoil |
+| `MAXOIL_TOKEN` | Opcional: pisa el token de Maxoil |
 
-URL, credenciales y descuento de Lubaires, y credenciales de Goicoechea, viven en `src/providers/config.ts`.
+URL y credenciales de Lubaires, Goicoechea y Maxoil viven en `src/providers/config.ts`.
+Descuentos y markups comerciales: `src/providers/pricing.ts` (`GET /api/pricing`).

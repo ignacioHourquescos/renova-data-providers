@@ -1,6 +1,9 @@
+import { getFixedDiscountPercent } from "./pricing.js";
+
 /**
  * Config central de scrapers / proveedores.
- * Acá viven URLs, descuentos, credenciales y metadatos.
+ * Acá viven URLs, credenciales y metadatos.
+ * Descuentos y markups comerciales: `src/providers/pricing.ts` (GET /api/pricing).
  */
 export type ProviderConfig = {
   id: string;
@@ -15,6 +18,14 @@ export type ProviderConfig = {
   password: string;
 };
 
+function requireDiscount(provider: string, brand?: string): number {
+  const value = getFixedDiscountPercent(provider, brand);
+  if (value == null) {
+    throw new Error(`Falta discountPercent fijo en pricing.ts para ${provider}`);
+  }
+  return value;
+}
+
 export const providers = {
   lubaires: {
     id: "lubaires",
@@ -22,7 +33,7 @@ export const providers = {
     baseUrl: "https://api.lubaires.com.ar/v1",
     origin: "https://www.lubaires.com.ar",
     referer: "https://www.lubaires.com.ar/",
-    discountPercent: 30,
+    discountPercent: requireDiscount("lubaires"),
     authHeader: "x-access-token",
     username: "1183",
     password: "001183",
@@ -63,6 +74,32 @@ export const providers = {
     name: "Eagle",
     baseUrl: "https://eagle-stock.up.railway.app",
     apiKey: "eagle_yZTsBJnYCKWrf_WaY_POyE58jfD3NMKTwLg4IwE5MLI",
+  },
+  maxoil: {
+    id: "maxoil",
+    name: "Maxoil",
+    baseUrl: "https://clientes.maxoil.info",
+    origin: "https://clientes.maxoil.info",
+    referer: "https://clientes.maxoil.info/modules/catalogos/catalogos.php",
+    /** Número de cliente del portal. */
+    username: "101006",
+    /** Token del portal (32 caracteres). */
+    password: "ZMJz9Ze30wk9qFjNY6a92LeGlqq8VAPD",
+    /** Prefijo con el que Maxoil guarda los artículos WEGA (FAP-2219 → 0350FAP2219). */
+    wegaCodePrefix: "0350",
+    /** Descuento sobre "$ Lista" (tabla en pricing.ts). */
+    discountPercent: requireDiscount("maxoil", "WEGA"),
+    /**
+     * Listas con el precio unitario de los artículos 0350. La general ya trae
+     * motos, caja automática, tapas, racing, vasos, cabezales y saca filtros.
+     */
+    wegaPriceLists: [
+      "lista_wega_general",
+      "lista_wega_kits",
+      "lista_wega_economicos",
+    ],
+    /** Mismos artículos de la general, con el precio por caja cerrada. */
+    wegaClosedBoxPriceList: "lista_wega_caja_cerrada",
   },
 } as const;
 

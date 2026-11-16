@@ -14,6 +14,8 @@ export type LubairesArticle = {
   publicPrice: number | null;
   /** Descuento % aplicado por nosotros sobre providerPrice */
   discountPercent: number;
+  /** Markup definido en pricing.ts para el cotizador. */
+  markupPercent: number;
   stockLabel: string | null;
   stockStatus: string | null;
   isOffer: boolean;
