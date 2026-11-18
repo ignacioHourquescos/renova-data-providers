@@ -162,25 +162,25 @@ describe("maxoil price lists", () => {
   });
 
   it("applies the configured discount to both prices", () => {
-    assert.deepEqual(toPriceInfo({ listPrice: 4776, closedBoxListPrice: 3570 }, 30, 15), {
+    assert.deepEqual(toPriceInfo({ listPrice: 4776, closedBoxListPrice: 3570 }, 30, 23), {
       price: 3343.2,
       listPrice: 4776,
       discountPercent: 30,
-      markupPercent: 15,
+      markupPercent: 23,
       closedBoxPrice: 2499,
     });
-    assert.deepEqual(toPriceInfo({ listPrice: 10000, closedBoxListPrice: null }, 30, 15), {
+    assert.deepEqual(toPriceInfo({ listPrice: 10000, closedBoxListPrice: null }, 30, 23), {
       price: 7000,
       listPrice: 10000,
       discountPercent: 30,
-      markupPercent: 15,
+      markupPercent: 23,
       closedBoxPrice: null,
     });
-    assert.deepEqual(toPriceInfo(undefined, 30, 15), {
+    assert.deepEqual(toPriceInfo(undefined, 30, 23), {
       price: null,
       listPrice: null,
       discountPercent: 30,
-      markupPercent: 15,
+      markupPercent: 23,
       closedBoxPrice: null,
     });
   });

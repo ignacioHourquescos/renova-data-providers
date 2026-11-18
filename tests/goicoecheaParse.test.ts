@@ -45,7 +45,7 @@ describe("goicoechea parse", () => {
     assert.equal(parsed.brand, "MAHLE");
     assert.equal(parsed.price, 24739.32);
     assert.equal(parsed.listPrice, 34360.16);
-    assert.equal(parsed.markupPercent, 15);
+    assert.equal(parsed.markupPercent, 23);
     assert.equal(parsed.inStock, null);
     assert.equal(parsed.quantity, 1);
   });

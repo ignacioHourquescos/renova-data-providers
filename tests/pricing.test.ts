@@ -33,8 +33,11 @@ describe("pricing catalog", () => {
   it("keeps Lubaires and Maxoil discounts/markups in sync with config", () => {
     assert.equal(getFixedDiscountPercent("lubaires"), 30);
     assert.equal(getFixedDiscountPercent("maxoil", "WEGA"), 30);
-    assert.equal(getFixedMarkupPercent("maxoil", "WEGA"), 15);
-    assert.equal(getFixedMarkupPercent("lubaires"), 15);
+    assert.equal(getFixedMarkupPercent("maxoil", "WEGA"), 23);
+    assert.equal(getFixedMarkupPercent("lubaires"), 23);
+    assert.equal(getFixedMarkupPercent("goicoechea"), 23);
+    assert.equal(getFixedMarkupPercent("wega", "WEGA"), 23);
+    assert.equal(getFixedMarkupPercent("eagle"), null);
     assert.equal(providers.lubaires.discountPercent, 30);
     assert.equal(providers.maxoil.discountPercent, 30);
   });
@@ -43,6 +46,6 @@ describe("pricing catalog", () => {
     const wega = pricingRules.find((r) => r.id === "wega-excel");
     assert.ok(wega);
     assert.equal(wega.discountPercent, null);
-    assert.equal(wega.markupPercent, 15);
+    assert.equal(wega.markupPercent, 23);
   });
 });

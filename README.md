@@ -29,7 +29,7 @@ GET /api/pricing
       "stock": true,
       "price": true,
       "discountPercent": 30,
-      "markupPercent": 15,
+      "markupPercent": 23,
       "priceBase": "listPrice",
       "notes": "..."
     }
@@ -230,7 +230,7 @@ Respuesta OK:
       "price": 5441.1,
       "listPrice": 7773,
       "discountPercent": 30,
-      "markupPercent": 15,
+      "markupPercent": 23,
       "closedBoxPrice": 4066.3
     }
   ],
